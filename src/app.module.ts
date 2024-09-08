@@ -17,7 +17,7 @@ import config from 'config/configuration.app';
     }),
     EventModule,
     ConfigModule.forRoot({
-      envFilePath: `env/${process.env.NODE_ENV}.env`,
+      envFilePath: `${process.env.NODE_ENV}.env`,
       load: [config],
       isGlobal: true
     }
