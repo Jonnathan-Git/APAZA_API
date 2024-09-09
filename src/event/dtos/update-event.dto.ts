@@ -1,6 +1,11 @@
-import { IsDateString, IsOptional, IsString } from "class-validator";
+import { IsDateString, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Multer } from "multer";
 
 export class UpdateEventDto {
+    
+    @IsString()
+    @IsNotEmpty()
+    id: string;
 
     @IsString()
     @IsOptional()
@@ -18,6 +23,7 @@ export class UpdateEventDto {
     @IsOptional()
     type?: string;
     
-    @IsOptional()
-    image?: File;
+    @IsString()
+    @IsNotEmpty()
+    image?: string;
 }

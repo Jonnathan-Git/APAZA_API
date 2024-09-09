@@ -5,15 +5,17 @@ import { Model } from 'mongoose';
 import { BAD_REQUEST, CREATED, OK } from 'src/constants/code.constant';
 import { Response } from 'src/domain/response';
 import { CreateEventDto } from './dtos/create-event.dto';
-import { returnErrorMessage, returnInfoMessage, returnSuccessMessage } from 'src/logic/logic';
+import { returnErrorMessage, returnInfoMessage, returnSuccessMessage } from 'src/logic/response.logic';
 import { UpdateEventDto } from './dtos/update-event.dto';
 import { Message } from 'src/constants/message.constant';
 import { ImageService } from 'src/logic/storage.logic';
+import { EventModule } from './event.module';
+import { isEmpty } from 'class-validator';
 
 @Injectable()
 export class EventService {
   constructor(@InjectModel(Event.name) private readonly eventModel: Model<Event>,
-  private readonly storageService: ImageService) { }
+    private readonly storageService: ImageService) { }
 
   async create(event: CreateEventDto, img: Express.Multer.File): Promise<Response> {
     const result = await this.storageService.uploadImage(img);
@@ -26,8 +28,14 @@ export class EventService {
     });
   }
 
-  async update(id: string, event: UpdateEventDto): Promise<Response> {
-    return this.eventModel.findByIdAndUpdate(id, event, { new: true }).then((response) => {
+  async update(event: UpdateEventDto, img?: Express.Multer.File): Promise<Response> {
+    if (!isEmpty(img)) {
+      await this.storageService.deleteImage(event.image);
+      const result = await this.storageService.uploadImage(img);
+      event.image = result;
+    }
+
+    return this.eventModel.findByIdAndUpdate(event.id, event, { new: true }).then((response) => {
       if (!response) {
         return returnInfoMessage([Message.ERROR_FOUND_MESSAGE], BAD_REQUEST);
       }

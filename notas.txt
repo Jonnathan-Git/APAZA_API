@@ -4,5 +4,8 @@ modulo: nest g module nombreModulo
 servicio: nest g service nombreModulo --no-spec
 controller: nest g controller nombreModulo --no-spec
 
-Crear las variables de entorno, y decirle a yano que me permita el correo de ella para crear todas 
+decirle a yano que me permita el correo de ella para crear todas 
 las cuentas para el proyecto, mongo y firebase
+
+crear funcion que me retorne un UUID para el nombre de las imagenes.
+validar que la imagen exista antes de eliminarla

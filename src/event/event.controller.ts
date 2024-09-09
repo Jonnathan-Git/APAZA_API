@@ -11,7 +11,7 @@ export class EventController {
   constructor(private readonly eventService: EventService) { }
 
   @Post()
-  @UseInterceptors(FileInterceptor('image'))  // Cambiado a FileInterceptor para un solo archivo
+  @UseInterceptors(FileInterceptor('image'))
   async create(
     @UploadedFile(imageValidator()) img: Express.Multer.File,
     @Body(new ValidationPipe()) event: CreateEventDto,
@@ -19,10 +19,15 @@ export class EventController {
     return this.eventService.create(event, img);
   }
   
-  @Put(':id')
-  async update(@Param('id') id: string, @Body(new ValidationPipe()) event: UpdateEventDto): Promise<Response> {
-    return this.eventService.update(id, event);
+  @Put()
+  @UseInterceptors(FileInterceptor('new-image')) 
+  async update(
+    @Body(new ValidationPipe()) event: UpdateEventDto,
+    @UploadedFile(imageValidator()) img?: Express.Multer.File
+  ): Promise<Response> {
+    return this.eventService.update(event,img);
   }
+
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<Response> {
