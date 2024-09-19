@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EventModule } from './event/event.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserModule } from './user/user.module';
 import config from 'config/configuration.app';
 
 @Module({
@@ -21,7 +22,8 @@ import config from 'config/configuration.app';
       load: [config],
       isGlobal: true
     }
-    )
+    ),
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],

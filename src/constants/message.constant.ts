@@ -10,5 +10,8 @@ export class Message {
   static readonly ERROR_CREATED_MESSAGE = 'Error al crear';
   static readonly ERROR_DELETED_MESSAGE = 'Error al eliminar';
   static readonly ERROR_FOUND_MESSAGE = 'Error al encontrar los registros';
+
+  static readonly LOGIN_SUCCESS_MESSAGE = 'Inicio de sesión exitoso';
+  static readonly LOGIN_ERROR_MESSAGE = 'Error al iniciar sesión, verifique sus credenciales';
 }
 

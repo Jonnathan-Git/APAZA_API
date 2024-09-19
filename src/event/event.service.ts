@@ -9,7 +9,6 @@ import { returnErrorMessage, returnInfoMessage, returnSuccessMessage } from 'src
 import { UpdateEventDto } from './dtos/update-event.dto';
 import { Message } from 'src/constants/message.constant';
 import { ImageService } from 'src/logic/storage.logic';
-import { EventModule } from './event.module';
 import { isEmpty } from 'class-validator';
 
 @Injectable()
@@ -21,11 +20,13 @@ export class EventService {
     const result = await this.storageService.uploadImage(img);
     event.image = result;
     const createdEvent = new this.eventModel(event);
-    return createdEvent.save().then((response) => {
+    const response = createdEvent.save().then((response) => {
       return returnSuccessMessage([Message.CREATED_MESSAGE], CREATED, response);
     }).catch((error) => {
       return returnErrorMessage([Message.ERROR_CREATED_MESSAGE], BAD_REQUEST, error);
     });
+
+    return response;
   }
 
   async update(event: UpdateEventDto, img?: Express.Multer.File): Promise<Response> {
@@ -35,7 +36,7 @@ export class EventService {
       event.image = result;
     }
 
-    return this.eventModel.findByIdAndUpdate(event.id, event, { new: true }).then((response) => {
+    const response = this.eventModel.findByIdAndUpdate(event.id, event, { new: true }).then((response) => {
       if (!response) {
         return returnInfoMessage([Message.ERROR_FOUND_MESSAGE], BAD_REQUEST);
       }
@@ -43,6 +44,8 @@ export class EventService {
     }).catch((error) => {
       return returnErrorMessage([Message.ERROR_UPDATED_MESSAGE], BAD_REQUEST, error);
     });
+
+    return response;
   }
 
   async delete(id: string): Promise<Response> {
