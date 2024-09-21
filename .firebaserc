@@ -1,5 +1,10 @@
 {
   "projects": {
-    "default": "apaza-img"
-  }
+    "default": "apaza-img",
+    "apaza-img": "apaza-img-74dd5",
+    "developer": "apaza-img-dev"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }
