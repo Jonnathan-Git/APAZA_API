@@ -9,3 +9,5 @@ las cuentas para el proyecto, mongo y firebase
 
 crear funcion que me retorne un UUID para el nombre de las imagenes.
 validar que la imagen exista antes de eliminarla
+
+hacer que al eliminar un evento elimine tambien la imagen
