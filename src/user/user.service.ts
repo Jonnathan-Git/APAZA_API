@@ -25,7 +25,7 @@ export class UserService {
 
     const createdUser = new this.userModel(user);
     const response = createdUser.save().then((response) => {
-      return returnSuccessMessage([Message.CREATED_MESSAGE], CREATED, response);
+      return returnSuccessMessage([Message.CREATED_MESSAGE], CREATED, new ResponseUserDTO(response.name, response.email, response.role));
     }).catch((error) => {
       return returnErrorMessage([Message.ERROR_CREATED_MESSAGE], BAD_REQUEST, error);
     });
@@ -35,7 +35,7 @@ export class UserService {
 
   async update(user: UpdateUserDto): Promise<Response> {
     const response = this.userModel.findByIdAndUpdate(user.id, user, { new: true }).then((response) => {
-      return returnSuccessMessage([Message.UPDATED_MESSAGE], OK, response);
+      return returnSuccessMessage([Message.UPDATED_MESSAGE], OK, new ResponseUserDTO(response.name, response.email, response.role));
     }).catch((error) => {
       return returnErrorMessage([Message.ERROR_UPDATED_MESSAGE], BAD_REQUEST, error);
     });
@@ -58,7 +58,8 @@ export class UserService {
 
   async findAll(): Promise<Response> {
     const response = this.userModel.find().then((response) => {
-      return returnSuccessMessage([Message.FOUND_MESSAGE], OK, response);
+      const res = response.map((user) => new ResponseUserDTO(user.name, user.email, user.role));
+      return returnSuccessMessage([Message.FOUND_MESSAGE], OK, res);
     }).catch((error) => {
       return returnErrorMessage([Message.ERROR_FOUND_MESSAGE], BAD_REQUEST, error);
     });
@@ -71,7 +72,7 @@ export class UserService {
       if (!response) {
         return returnInfoMessage([Message.ERROR_FOUND_MESSAGE], BAD_REQUEST);
       }
-      return returnSuccessMessage([Message.FOUND_MESSAGE], OK, response);
+      return returnSuccessMessage([Message.FOUND_MESSAGE], OK, new ResponseUserDTO(response.name, response.email, response.role));
     }).catch((error) => {
       return returnErrorMessage([Message.ERROR_FOUND_MESSAGE], BAD_REQUEST, error);
     });
