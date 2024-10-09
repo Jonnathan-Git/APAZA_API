@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { EventModule } from './event/event.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
+import { GalleryModule } from './gallery/gallery.module';
 import config from 'config/configuration.app';
 
 @Module({
@@ -23,7 +24,8 @@ import config from 'config/configuration.app';
       isGlobal: true
     }
     ),
-    UserModule
+    UserModule,
+    GalleryModule
   ],
   controllers: [AppController],
   providers: [AppService],

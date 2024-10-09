@@ -39,4 +39,13 @@ export class ImageService {
       throw new Error('Error al convertir la imagen a webp');
     }
   }
+
+  public async uploadBatchImages(images: Express.Multer.File[]): Promise<string[]> {
+    const urls: string[] = [];
+    for (const image of images) {
+      const url = await this.uploadImage(image);
+      urls.push(url);
+    }
+    return urls;
+  }
 }
