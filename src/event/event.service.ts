@@ -49,15 +49,25 @@ export class EventService {
   }
 
   async delete(id: string): Promise<Response> {
-    return this.eventModel.findByIdAndDelete(id).then((response) => {
+    try {
+      const response = await this.eventModel.findByIdAndDelete(id);
+  
       if (!response) {
         return returnInfoMessage([Message.ERROR_FOUND_MESSAGE], BAD_REQUEST);
       }
+  
+      try {
+        await this.storageService.deleteImage(response.image);
+      } catch (error) {
+        return returnErrorMessage([Message.ERROR_DELETED_MESSAGE], BAD_REQUEST, error);
+      }
+  
       return returnInfoMessage([Message.DELETED_MESSAGE], OK);
-    }).catch((error) => {
+    } catch (error) {
       return returnErrorMessage([Message.ERROR_DELETED_MESSAGE], BAD_REQUEST, error);
-    });
+    }
   }
+  
 
   async findAll(): Promise<Response> {
     return this.eventModel.find().then((response) => {

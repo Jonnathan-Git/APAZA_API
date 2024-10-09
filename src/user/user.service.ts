@@ -21,16 +21,20 @@ export class UserService {
 
   async create(user: CreateUserDto): Promise<Response> {
 
-    user.password = await EncryptLogic.encryptPassword(user.password);
+    if (!await this.verifyRegisteredUser(user.email)) {
+      user.password = await EncryptLogic.encryptPassword(user.password);
 
-    const createdUser = new this.userModel(user);
-    const response = createdUser.save().then((response) => {
-      return returnSuccessMessage([Message.CREATED_MESSAGE], CREATED, new ResponseUserDTO(response.name, response.email, response.role));
-    }).catch((error) => {
-      return returnErrorMessage([Message.ERROR_CREATED_MESSAGE], BAD_REQUEST, error);
-    });
+      const createdUser = new this.userModel(user);
+      const response = createdUser.save().then((response) => {
+        return returnSuccessMessage([Message.CREATED_MESSAGE], CREATED, new ResponseUserDTO(response.name, response.email, response.role));
+      }).catch((error) => {
+        return returnErrorMessage([Message.ERROR_CREATED_MESSAGE], BAD_REQUEST, error);
+      });
 
-    return response;
+      return response;
+    }else{
+      return returnInfoMessage([Message.ERROR_REGISTERED_MESSAGE], BAD_REQUEST);
+    }
   }
 
   async update(user: UpdateUserDto): Promise<Response> {
@@ -99,4 +103,10 @@ export class UserService {
     }
   }
 
+  verifyRegisteredUser(email: string): Promise<boolean> {
+    const response = this.userModel.findOne().where('email').equals(email).then((response) => {
+      return response ? true : false;
+    });
+    return response;
+  }
 }
