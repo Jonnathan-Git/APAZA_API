@@ -9,6 +9,7 @@ import { returnErrorMessage, returnInfoMessage, returnSuccessMessage } from 'src
 import { Message } from 'src/constants/message.constant';
 import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from 'src/constants/code.constant';
 import { UpdateGalleryDto } from './dto/update-gallery.dto';
+import { PaginationGalleryDto } from './dto/pagination-gallery.dto';
 
 @Injectable()
 export class GalleryService {
@@ -39,14 +40,27 @@ export class GalleryService {
     }
   }
 
-  async findAll(): Promise<Response> {
-    const response = this.galleryModel.find().then((response) => {
-      return returnSuccessMessage([Message.FOUND_MESSAGE], OK, response);
-    }).catch((error) => {
-      return returnErrorMessage([Message.ERROR_FOUND_MESSAGE], BAD_REQUEST, error);
-    });
+  async findAll(page: number = 1, limit:number = 5): Promise<Response> {
+    const skip = (page - 1) * limit;
+    try {
+      const [galleries, total] = await Promise.all([
+        this.galleryModel
+          .find()
+          .sort({ year: -1 }) // Ordenar por año de forma descendente
+          .skip(skip)
+          .limit(limit)
+          .exec(),
+        this.galleryModel.countDocuments(),
+      ]);
 
-    return response;
+      const totalPages = Math.ceil(total / limit);
+
+      const responseObj = new PaginationGalleryDto(galleries, page, limit, totalPages, total);
+
+      return returnSuccessMessage([Message.FOUND_MESSAGE], OK, responseObj);
+    } catch (error) {
+      return returnErrorMessage([Message.ERROR_FOUND_MESSAGE], BAD_REQUEST, error);
+    }
   }
 
   async findById(id: string): Promise<Response> {
@@ -63,21 +77,21 @@ export class GalleryService {
     if (!galleryToUpdate) {
       return returnInfoMessage([Message.NOT_FOUND_MESSAGE], NOT_FOUND);
     }
-  
+
     const newImagesReferences = await this.processNewImages(newImages);
     const updatedImages = this.updateImageList(galleryToUpdate.images, trashImages, newImagesReferences);
-  
+
     try {
       const updatedGallery = await this.updateGalleryInDatabase(id, title, description, updatedImages);
       await this.deleteTrashImages(trashImages);
-  
+
       return returnSuccessMessage([Message.UPDATED_MESSAGE], OK, updatedGallery);
     } catch (error) {
       return returnErrorMessage([Message.ERROR_UPDATED_MESSAGE], BAD_REQUEST, error);
     }
   }
-  
-  
+
+
   async delete(id: string): Promise<Response> {
     return this.galleryModel.findByIdAndDelete(id).then(async (response) => {
       if (!response) {
@@ -99,18 +113,18 @@ export class GalleryService {
     const deletePromises = images.map(image => this.storageService.deleteImage(image));
     Promise.all(deletePromises);
   }
-  
+
   private async processNewImages(newImages?: Express.Multer.File[]): Promise<string[]> {
     return newImages?.length ? await this.updateArrayImages(newImages) : [];
   }
-  
+
   private updateImageList(currentImages: string[], trashImages: string[] = [], newImages: string[] = []): string[] {
     const filteredImages = trashImages.length
       ? currentImages.filter(image => !trashImages.includes(image))
       : currentImages;
     return [...filteredImages, ...newImages];
   }
-  
+
   private async updateGalleryInDatabase(id: string, title: string, description: string, images: string[]): Promise<Gallery> {
     return this.galleryModel.findByIdAndUpdate(
       id,
@@ -118,7 +132,7 @@ export class GalleryService {
       { new: true }
     );
   }
-  
+
   private async deleteTrashImages(trashImages: string[] = []): Promise<void> {
     if (trashImages.length) {
       await this.deleteArrayImages(trashImages);
