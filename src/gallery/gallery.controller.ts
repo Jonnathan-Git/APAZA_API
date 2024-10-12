@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post, UploadedFile, UploadedFiles, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UploadedFiles, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { GalleryService } from './gallery.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreateGalleryDto } from './dto/create-gallery.dto';
 import { Response } from 'src/domain/response';
+import { UpdateGalleryDto } from './dto/update-gallery.dto';
 
 @Controller('gallery')
 export class GalleryController {
@@ -17,8 +18,27 @@ export class GalleryController {
     return this.galleryService.create(gallery,images);
   }
 
+  @Put()
+  @UseInterceptors(FilesInterceptor('newImages',30))
+  async update(
+    @Body(new ValidationPipe()) gallery: UpdateGalleryDto,
+    @UploadedFiles() newImages?: Express.Multer.File[]
+  ): Promise<Response> {
+    return this.galleryService.update(gallery,newImages);
+  }
+
   @Get()
   async findAll(): Promise<Response> {
     return this.galleryService.findAll();
+  }
+
+  @Get(':id')
+  async findById(@Param('id')id: string): Promise<Response> {
+    return this.galleryService.findById(id);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id')id: string): Promise<Response> {
+    return this.galleryService.delete(id);
   }
 }
