@@ -59,42 +59,25 @@ export class GalleryService {
   }
 
   async update({ id, title, description, trashImages }: UpdateGalleryDto, newImages?: Express.Multer.File[]): Promise<Response> {
-
     const galleryToUpdate: Gallery = await this.galleryModel.findById(id);
     if (!galleryToUpdate) {
       return returnInfoMessage([Message.NOT_FOUND_MESSAGE], NOT_FOUND);
     }
-
-    // Actualizar imágenes si es necesario
-    const newImagesReferences = newImages?.length ? await this.updateArrayImages(newImages) : [];
-    let updatedImages = [];
-    // Filtrar las imágenes no eliminadas y agregar las nuevas
-    if(trashImages?.length && trashImages.length > 0) {
-      updatedImages = [
-        ...galleryToUpdate.images.filter(image => !trashImages.includes(image)),
-        ...newImagesReferences
-      ];
-    }else{
-      updatedImages = [...galleryToUpdate.images, ...newImagesReferences];
-    }
-
+  
+    const newImagesReferences = await this.processNewImages(newImages);
+    const updatedImages = this.updateImageList(galleryToUpdate.images, trashImages, newImagesReferences);
+  
     try {
-      const updatedGallery = await this.galleryModel.findByIdAndUpdate(
-        id,
-        {
-          $set: { title, description, images: updatedImages }
-        },
-        { new: true }
-      );
-      // Eliminar imágenes si es necesario
-      trashImages?.length ? await this.deleteArrayImages(trashImages) : [];
-
+      const updatedGallery = await this.updateGalleryInDatabase(id, title, description, updatedImages);
+      await this.deleteTrashImages(trashImages);
+  
       return returnSuccessMessage([Message.UPDATED_MESSAGE], OK, updatedGallery);
     } catch (error) {
       return returnErrorMessage([Message.ERROR_UPDATED_MESSAGE], BAD_REQUEST, error);
     }
   }
-
+  
+  
   async delete(id: string): Promise<Response> {
     return this.galleryModel.findByIdAndDelete(id).then(async (response) => {
       if (!response) {
@@ -115,5 +98,30 @@ export class GalleryService {
   private async deleteArrayImages(images: string[]): Promise<void> {
     const deletePromises = images.map(image => this.storageService.deleteImage(image));
     Promise.all(deletePromises);
+  }
+  
+  private async processNewImages(newImages?: Express.Multer.File[]): Promise<string[]> {
+    return newImages?.length ? await this.updateArrayImages(newImages) : [];
+  }
+  
+  private updateImageList(currentImages: string[], trashImages: string[] = [], newImages: string[] = []): string[] {
+    const filteredImages = trashImages.length
+      ? currentImages.filter(image => !trashImages.includes(image))
+      : currentImages;
+    return [...filteredImages, ...newImages];
+  }
+  
+  private async updateGalleryInDatabase(id: string, title: string, description: string, images: string[]): Promise<Gallery> {
+    return this.galleryModel.findByIdAndUpdate(
+      id,
+      { $set: { title, description, images } },
+      { new: true }
+    );
+  }
+  
+  private async deleteTrashImages(trashImages: string[] = []): Promise<void> {
+    if (trashImages.length) {
+      await this.deleteArrayImages(trashImages);
+    }
   }
 }
