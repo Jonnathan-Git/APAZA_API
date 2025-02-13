@@ -6,6 +6,7 @@ import { EventModule } from './event/event.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { GalleryModule } from './gallery/gallery.module';
+import { BoardModule } from './board/board.module';
 import config from 'config/configuration.app';
 
 @Module({
@@ -25,7 +26,8 @@ import config from 'config/configuration.app';
     }
     ),
     UserModule,
-    GalleryModule
+    GalleryModule,
+    BoardModule
   ],
   controllers: [AppController],
   providers: [AppService],
