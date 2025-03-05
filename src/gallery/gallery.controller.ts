@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UploadedFiles, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UploadedFiles, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { GalleryService } from './gallery.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreateGalleryDto } from './dto/create-gallery.dto';
@@ -27,8 +27,8 @@ export class GalleryController {
     return this.galleryService.update(gallery, newImages);
   }
 
-  @Get('page/:page/limit/:limit')
-  async findAll(@Param('page') page?: number, @Param('limit') limit?: number): Promise<Response> {
+  @Get()
+  async findAll(@Query('page') page?: number, @Query('limit') limit?: number): Promise<Response> {
     return this.galleryService.findAll(page, limit);
   }
 
