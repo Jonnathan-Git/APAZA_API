@@ -72,7 +72,7 @@ export class GalleryService {
     });
   }
 
-  async update({ id, title, description, trashImages }: UpdateGalleryDto, newImages?: Express.Multer.File[]): Promise<Response> {
+  async update({ id, year, description, trashImages }: UpdateGalleryDto, newImages?: Express.Multer.File[]): Promise<Response> {
     const galleryToUpdate: Gallery = await this.galleryModel.findById(id);
     if (!galleryToUpdate) {
       return returnInfoMessage([Message.NOT_FOUND_MESSAGE], NOT_FOUND);
@@ -82,8 +82,8 @@ export class GalleryService {
     const updatedImages = this.updateImageList(galleryToUpdate.images, trashImages, newImagesReferences);
 
     try {
-      const updatedGallery = await this.updateGalleryInDatabase(id, title, description, updatedImages);
-      await this.deleteTrashImages(trashImages);
+      const updatedGallery = await this.updateGalleryInDatabase(id, year, description, updatedImages);
+      //await this.deleteTrashImages(trashImages);
 
       return returnSuccessMessage([Message.UPDATED_MESSAGE], OK, updatedGallery);
     } catch (error) {
@@ -125,10 +125,10 @@ export class GalleryService {
     return [...filteredImages, ...newImages];
   }
 
-  private async updateGalleryInDatabase(id: string, title: string, description: string, images: string[]): Promise<Gallery> {
+  private async updateGalleryInDatabase(id: string, year: number, description: string, images: string[]): Promise<Gallery> {
     return this.galleryModel.findByIdAndUpdate(
       id,
-      { $set: { title, description, images } },
+      { $set: { year, description, images } },
       { new: true }
     );
   }
