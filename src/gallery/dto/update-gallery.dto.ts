@@ -1,13 +1,13 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UpdateGalleryDto {
   @IsString()
   @IsNotEmpty()
   id:string;
 
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  title: string;
+  year: number;
 
   @IsString()
   @IsOptional()
